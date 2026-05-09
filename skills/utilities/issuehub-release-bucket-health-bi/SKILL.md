@@ -1,7 +1,7 @@
 ---
 name: issuehub-release-bucket-health-bi
-description: 固定 HLB IssueHub 正式 BI V01 的生成口径、Owner与闭环分析结构、版本桶 626/725/828、Jira关闭/预计关闭双口径、静态趋势图和未关闭 Issue Classification 堆积图。
-trigger: IssueHub 正式BI、HLB IssueHub BI、issuehub db、Owner与闭环、预计总体关闭、Ready To Test in UAT、Issue Classification 堆积、版本桶626/725/828、Jira关闭率
+description: 固定 HLB IssueHub 正式 BI V01 的生成口径、Owner与闭环分析结构、Golive Date版本桶（6/26、7/25、8/28）、Jira关闭/预计关闭双口径、静态趋势图和未关闭 Issue Classification 堆积图。
+trigger: IssueHub 正式BI、HLB IssueHub BI、issuehub db、Owner与闭环、预计总体关闭、Ready To Test in UAT、Issue Classification 堆积、版本桶、Golive Date、6/26版本、7/25版本、8/28版本、Jira关闭率
 ---
 
 # HLB IssueHub 正式 BI V01 固定技能
@@ -17,7 +17,7 @@ trigger: IssueHub 正式BI、HLB IssueHub BI、issuehub db、Owner与闭环、�
   - JSON：`/Users/zhangliang/hlb/04_Jira_jira/issuehub/IssueHub_BI_YYYYMMDD_V01_data.json`
 - 禁止生成或改名为 NextGen、作战日报、科技行长摘要、高级驾驶舱、Audited 等变体。
 - 除非用户明确要求改版，否则不要重做布局、换风格、换结构；只更新数据、口径和必要局部细节。
-- 风格使用银行/管理层风格：深蓝、银灰、金、深红；不要 Hermes 橙黑主题。
+- 风格使用 Apple / iOS 极致清晰风格为默认：白/浅灰背景、Apple系统字体、极简卡片、清晰层级、低噪音、圆角玻璃感、iOS式分段 tab、充足留白、精致阴影；保持银行管理层严肃感。整体目标是“轻松、愉快、清晰、准确”。不要 Hermes 橙黑主题。历史银行深蓝/银灰/金/深红只作为少量强调色，不要再做厚重暗色风。
 - 生成前后必须自检，不能把静态渲染失败的版本交给用户。
 
 ## 标准生成流程
@@ -164,16 +164,36 @@ KPI 必须输出：
 
 版本桶必须使用 `Golive Date` 字段，不再用 `Client ETA` 反推：
 
-- `Golive Date = 2026-06-26` → 展示名统一为 `626`
-- `Golive Date = 2026-07-25` → 展示名统一为 `725`
-- `Golive Date = 2026-08-28` → 展示名统一为 `828`
+- `Golive Date = 2026-06-26` → 展示名统一为 `6/26版本`
+- `Golive Date = 2026-07-25` → 展示名统一为 `7/25版本`
+- `Golive Date = 2026-08-28` → 展示名统一为 `8/28版本`
 - Golive Date 未填或不在三类日期内 → `未标记`
 
-注意：
+重要命名纪律：
 
-- `Client ETA` 仅作为每日承诺/SLA 和超期风险使用。
-- 页面中禁止再出现 `6月底 / 7月底 / 8月底 / 520=7月25版本 / 626=8月底版本` 等旧标签。
-- 页面展示只用 `626 / 725 / 828 / 未标记`。
+- 不要再直接展示 `626 / 725 / 828` 作为主标签。用户已明确反馈这会被误解为 Issue 编号或数量，尤其 `828` 容易被误认为 IssueHub 已到 800+。
+- 如确需说明缩写，只能在说明文字中写：`6/26版本（Golive Date=2026-06-26）`，不要把 `626` 作为卡片标题、图例、表格主列值。
+- `8/28版本` 不是 CUH-828，也不是 Issue 数字；它来自 `Golive Date = 2026-08-28` 的版本桶。
+- `Client ETA` 仅作为每日承诺/SLA 和超期风险使用，不参与版本桶计算。
+- 页面中禁止再出现旧内部标签：`6月底版本`、`520=7月25版本`、`626=8月底版本`。
+- 页面展示统一用 `6/26版本 / 7/25版本 / 8/28版本 / 未标记`。
+
+实现建议：
+
+```python
+def release_bucket(golive_date):
+    d = parse_date(golive_date)
+    s = str(golive_date or '').strip().replace('/','').replace('-','')
+    if not s and not d:
+        return '未标记'
+    if (d and d.strftime('%m-%d') == '06-26') or '20260626' in s or '0626' in s:
+        return '6/26版本'
+    if (d and d.strftime('%m-%d') == '07-25') or '20260725' in s or '0725' in s:
+        return '7/25版本'
+    if (d and d.strftime('%m-%d') == '08-28') or '20260828' in s or '0828' in s:
+        return '8/28版本'
+    return '未标记'
+```
 
 ## Issue Classification 堆积图口径：固定
 
@@ -203,25 +223,81 @@ cnt = Counter(norm_class(x.get('classification')) for x in open_arr)
 7. 环境问题
 8. 未分类
 
+## 每日过会顺序与 tab 顺序：固定
+
+每天 IssueHub BI 过会必须按真实会议过程排版和推进，不要一上来逐人扫 Owner：
+
+1. `看数字`
+   - KPI、Jira总体关闭、预计总体关闭、6/26版本 S/H、今日新增/关闭。
+2. `看管理`
+   - ITPM 讲 IssueHub 管理摘要、预计关闭差距、数据质量。
+3. `李科讲现场`
+   - 现场阻塞、客户反馈、当天可推动项。
+4. `吴员英讲测试打回`
+   - 验证不通过新增、打回人、提测翻转人、测试责任缺口。
+5. `按 Owner 逐人往下看`
+   - 先 S/H、ETA超期、Ready To Test 翻转，再看普通未关闭。
+
+BI 主 tab 必须按每日会议过程，而不是按数据分析模块排列：
+
+1. `1 李科同步现场` —— 默认打开，讲现场阻塞、客户反馈、当天可推动项。
+2. `2 吴员英讲测试` —— 展示测试打回情况、验证不通过新增、提测翻转分母和下钻。
+3. `3 ITPM讲管理摘要` —— 展示管理摘要、Jira/预计关闭、关闭率差距、6/26版本 S/H、管理动作。
+4. `4 ITPM讲Owner与闭环` —— 原 Owner 与闭环核心逻辑，逐 Owner 过会。
+
+原有 `总览 / 分类分布 / 流转与模块 / 版本/ETA / 关键清单 / 数据质量` 的 section 和 JS 逻辑必须保留，作为补充查询或内部渲染依赖，但不要放在每日会议主 tab 上。
+
 ## Owner 与闭环 tab 固定结构
 
 Owner 与闭环 tab 只保留以下结构：
+
+0. `每日开会顺序`
+   - 固定在 Owner 与闭环 tab 最上方。
+   - 五步：看数字 → 看管理 → 李科现场 → 吴员英测试打回 → 按 Owner 逐人看。
+   - 页面排版必须符合开会顺序：先数字、再管理、再现场、再测试、最后逐人闭环。
 
 1. `总体 / 版本桶关闭率趋势`
    - 静态 SVG
    - 5 条线：
      - Jira关闭
      - 预计总体关闭
-     - 626
-     - 725
-     - 828
-   - 上方显示：
+     - 6/26版本
+     - 7/25版本
+     - 8/28版本
+   - 上方必须先展示三个数据卡片：
+     - `Jira总体关闭`：`closed_cancelled / total`、`close_rate%`、说明 Closed/Cancelled/Resolved 口径。
+     - `预计总体关闭`：`expected_closed / total`、`expected_close_rate%`、说明包含待客户验证/客户解释。
+     - `比Jira关闭多出的部分`：`expected_closed - closed_cancelled`，并展开互斥拆分：Ready To Test in UAT、客户解释、评论/描述判定。
+   - 再显示小卡片：
      - 今日Jira关闭
      - 今日新增
      - 预计总体关闭
    - 点位显示百分比和数字，如 `54.7%` + `434/793`、`69.4%` + `550/793`
 
-2. `版本桶未关闭事实`
+2. `测试打回情况 · Custom fields Status`
+   - 固定放在总体/版本桶关闭率趋势之后、版本桶未关闭事实之前。
+   - 用于吴员英讲测试打回情况。
+   - 分子：当天 Custom fields 的 `Status` 字段被翻转为 `验证不通过` 的 Issue 数量。
+   - 分母：当天 Custom fields 的 `Status` 字段被翻转为以下提测状态的 Issue 数量：
+     - `已部署国内-SIT`
+     - `已部署HLB-SIT`
+     - `已部署HLB-UAT`
+   - 指标必须展示：
+     - 今日新增验证不通过
+     - 今日提测翻转分母
+     - 今日打回率 = 今日新增验证不通过 / 今日提测翻转分母
+     - 当前验证不通过存量
+   - 下钻必须展示：
+     - 新增验证不通过 Issue
+     - Status 翻转时间
+     - 翻转前后状态
+     - 打回人，即谁把 Status 翻转为验证不通过
+     - 最近一次提测状态
+     - 最近一次提测人，即这个被打回 Issue 之前是谁翻转为已部署国内-SIT / 已部署HLB-SIT / 已部署HLB-UAT
+   - 分母下钻必须展示当天所有提测翻转 Issue，以及提测翻转人。
+   - 当前 DB 已确认 Status custom field 为 `custom_field_id=5`，edit_logs 中字段为 `field_label_snapshot='Status'`；后续若字段 ID 变化，应优先按 label/key 查找 Status，不要硬编码到不可修复。
+
+3. `版本桶未关闭事实`
    - 只展示事实指标：
      - 版本桶
      - 未关闭
@@ -234,10 +310,10 @@ Owner 与闭环 tab 只保留以下结构：
 3. `Issue Classification 图例`
    - 说明堆积图只统计未关闭 Issue。
 
-4. `模块组关闭率排名`
+- `模块组关闭率排名`
    - 按主模块组聚合。
    - 重复标签人员不重复计数。
-   - 展示总数、Jira已关闭、Jira未关闭、关闭率、626/725/828关闭率。
+   - 展示总数、Jira已关闭、Jira未关闭、关闭率、6/26版本 / 7/25版本 / 8/28版本关闭率。
 
 5. `Owner 关闭率追踪`
    - 只保留“按模块分组清单”。
@@ -313,7 +389,7 @@ BI 页面顶部 KPI 下方必须增加“管理摘要”卡片，放在原 Issue
 
 4. `管理动作`
    - 固定动作方向：推动客户验证并翻转 Jira；优先处理 626 S/H。
-   - 必须展示 626 版本桶未关闭数和 S/H 数。
+   - 必须展示 `6/26版本` 未关闭数和 S/H 数。
    - 可追加 Owner 侧 S/H Top 3，用于当天盯人。
 
 推荐文案模板：
@@ -325,7 +401,7 @@ BI 页面顶部 KPI 下方必须增加“管理摘要”卡片，放在原 Issue
     <div class="exec-item"><b>Jira 正式关闭</b><span>当前 Jira 已关闭 <strong>{closed} / {total}</strong>，关闭率 <strong>{close_rate}%</strong>；Jira 未关闭 <strong>{open}</strong> 条，其中 S/H <strong>{critical_open}</strong> 条。</span></div>
     <div class="exec-item"><b>预计可闭环</b><span>按“已关闭 + Ready To Test in UAT + 客户解释/客户侧原因”口径，预计可闭环 <strong>{expected_closed} / {total}</strong>，预计关闭率 <strong>{expected_close_rate}%</strong>。</span></div>
     <div class="exec-item"><b>关闭率差距</b><span>预计关闭比 Jira 正式关闭多 <strong>{gap}</strong> 条，主要来自 Ready To Test in UAT <strong>{ready}</strong> 条、客户解释类 <strong>{customer_explain_open}</strong> 条、评论/描述判定客户侧或暂不改 <strong>{comment_expected}</strong> 条。</span></div>
-    <div class="exec-item action"><b>管理动作</b><span>优先推动客户验证并翻转 Jira；626 版本桶仍是主战场，未关闭 <strong>{release_626_open}</strong> 条、S/H <strong>{release_626_sh}</strong> 条；Owner 侧先盯 S/H 集中的 {owner_top3_text}。</span></div>
+    <div class="exec-item action"><b>管理动作</b><span>优先推动客户验证并翻转 Jira；6/26版本桶仍是主战场，未关闭 <strong>{release_626_open}</strong> 条、S/H <strong>{release_626_sh}</strong> 条；Owner 侧先盯 S/H 集中的 {owner_top3_text}。</span></div>
   </div>
 </div>
 ```
@@ -350,14 +426,18 @@ BI 页面顶部 KPI 下方必须增加“管理摘要”卡片，放在原 Issue
 - Jira 正式关闭：434 / 793，54.7%；Jira 未关闭 359，S/H 251。
 - 预计可闭环：550 / 793，69.4%。
 - 差距：预计关闭比 Jira 正式关闭多 116；Ready To Test in UAT 67，客户解释类 14，评论/描述判定客户侧或暂不改 35。
-- 管理动作：626 未关闭 195，S/H 169；Owner S/H Top 3：李强29条、骆京行19条、刘帅19条。
+- 管理动作：6/26版本未关闭 195，S/H 169；Owner S/H Top 3：李强29条、骆京行19条、刘帅19条。
 
 ## 必须自检
 
 每次输出给用户前必须执行自检。至少检查：
 
-1. 数据源
+1. 数据源与顶部 KPI
    - JSON `source_db` 必须是用户指定 DB。
+   - 顶部每个 KPI 卡片必须显露“较昨日”的变化提示，不能只写进 HTML 但页面看不到。
+   - 至少 total/open/close_rate 要有真实昨日差异，其他无可靠历史来源时可显示 `较昨日 —`，不要编造。
+   - 渲染方式要稳：在 DOMContentLoaded、立即执行、短延迟补偿各执行一次，避免主 init() 后生成 KPI 卡片导致 delta 没插进去。
+   - 自测必须用浏览器 DOM 查询 `.kpi .kdelta`，确认数量等于 KPI 卡片数量，且前 3 项显示真实变化。
 
 2. Jira 关闭口径
    - `Closed/Cancelled/Resolved` 的数量应计入已关闭。
@@ -378,16 +458,31 @@ BI 页面顶部 KPI 下方必须增加“管理摘要”卡片，放在原 Issue
      - `6月底版本`
      - `520=7月25版本`
      - `626=8月底版本`
-     - `6月底`
-     - `7月底`
-     - `8月底`
-   - 必须出现 `626 / 725 / 828`。
+   - 页面主展示中不得直接用 `626 / 725 / 828` 作为版本桶标签，避免被误解为 issue 编号或数量。
+   - 必须出现 `6/26版本 / 7/25版本 / 8/28版本 / 未标记`。
 
 6. 结构禁项
    - 不得出现 `按关闭率排名追踪`。
    - 不得出现独立 `版本健康度` tab。
 
-7. 静态渲染
+7. 每日会议顺序与 tab 顺序
+   - 主 tabs 必须只有四个：`1 李科同步现场`、`2 吴员英讲测试`、`3 ITPM讲管理摘要`、`4 ITPM讲Owner与闭环`。
+   - 默认 active section 必须是 `1 李科同步现场`，section id 为 `live`。
+   - `1 李科同步现场` section id 为 `live`，下方可加入轻松但不幼稚的视觉元素以减少空白；当前固定使用像素大熊猫插画（纯 HTML/CSS，不依赖图片），要求更大、更胖、像素感明显，可用轻微 CSS 动效（上下浮动/挥手/竹子轻摆），让页面轻松、愉快、清晰但不影响数据严肃性。
+   - `2 吴员英讲测试` section id 为 `test`，必须包含 `测试打回情况 · Custom fields Status`，并显示验证不通过新增、提测翻转分母、打回率、当前验证不通过存量；只保留“新增验证不通过下钻”，删除“今日提测翻转分母下钻”明细，避免会议噪音。
+   - `3 ITPM讲管理摘要` section id 为 `mgmt`，必须包含管理摘要、Jira总体关闭、预计总体关闭、比Jira关闭多出的部分、趋势图，并把 `版本桶未关闭事实` 放在此页。
+   - `4 ITPM讲Owner与闭环` section id 为 `owner`，必须完整保留原 Owner 与闭环核心逻辑；禁止删改 Owner 分组、Owner趋势、Issue Classification 堆积（未关闭）、模块组关闭率排名。此页不再重复展示总体关闭率趋势、测试打回情况、版本桶未关闭事实、Issue Classification 图例。
+   - 原补充 section id `dataq`、`overview`、`classify`、`flow`、`eta`、`lists` 必须仍保留在 DOM 中，确保原渲染逻辑不报错，但不要放在每日会议主 tab 上。
+   - 旧的顶部 `Issue Classification 管理视图` note 与上方 KPI 重复，必须从可见页面删除；如 JS 依赖 `id="summary"`，保留隐藏占位 `<div id="summary" style="display:none"></div>`，不要显示该段文字。
+
+8. 强化前端自测
+   - 必须用浏览器逐个点击所有 tab：Owner与闭环、数据质量、总览、分类分布、流转与模块、版本/ETA、关键清单。
+   - 每次点击后检查 browser console，JS errors 必须为 0。
+   - 必须检查关键容器存在且渲染：`badClassTable`、`etaMissingTable`、`goliveMissingTable`、`classAllChart`、`classOpenChart`、`classDistTables`、`statusChart`、`actionTable`。
+   - 必须检查 tab onclick id 与 section id 一致：`dataq` 对数据质量、`classify` 对分类分布。
+   - 必须自检原有口径不变：total、closed_cancelled、expected_closed、open、Issue Classification 未关闭堆积、6/26/7/25/8/28 标签。
+
+9. 静态渲染
    - 顶部趋势图每条 polyline 至少 2 个点，最好有历史 3 点。
    - 浏览器打开后 console JS error = 0。
 
@@ -409,8 +504,11 @@ polys = re.findall(r'<polyline points="([^"]+)"', owner)
 assert len(polys) >= 5 and all(len(x.split()) >= 2 for x in polys[:5])
 assert 'Issue Classification 堆积（未关闭）' in owner
 assert '按关闭率排名追踪' not in owner
-for old in ['6月底版本','520=7月25版本','626=8月底版本','6月底','7月底','8月底']:
+for old in ['6月底版本','520=7月25版本','626=8月底版本']:
     assert old not in owner
+for ambiguous in ['>626<','>725<','>828<']:
+    assert ambiguous not in owner
+assert '6/26版本' in owner and '7/25版本' in owner and '8/28版本' in owner
 ```
 
 然后用浏览器工具打开 HTML，切到 Owner 与闭环，检查 console：
@@ -442,10 +540,12 @@ for old in ['6月底版本','520=7月25版本','626=8月底版本','6月底','7�
 
 版本桶未关闭：
 
-- 626：195，S/H 169
-- 725：31，S/H 17
-- 828：25，S/H 8
+- 6/26版本：195，S/H 169
+- 7/25版本：31，S/H 17
+- 8/28版本：25，S/H 8
 - 未标记：108，S/H 57
+
+注意：以上版本桶来自 Golive Date，不是 Issue 编号；`8/28版本` 不表示 CUH-828 或 IssueHub 已到 800+。
 
 已通过自检：
 
@@ -457,6 +557,6 @@ for old in ['6月底版本','520=7月25版本','626=8月底版本','6月底','7�
 - 最新点位显示 21:10：PASS
 - 图上显示 434/793 与 550/793：PASS
 - Issue Classification 堆积只看未关闭：PASS
-- 版本桶标签为 626 / 725 / 828：PASS
+- 版本桶标签为 6/26版本 / 7/25版本 / 8/28版本：PASS
 - 无“按关闭率排名追踪”：PASS
 - 浏览器控制台 JS 错误：0
