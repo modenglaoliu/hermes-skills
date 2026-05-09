@@ -10,14 +10,17 @@ trigger: IssueHub 正式BI、HLB IssueHub BI、issuehub db、Owner与闭环、�
 
 用户已固定认可 IssueHub BI V01 的结构、样式和分析口径。以后生成 HLB IssueHub BI 时：
 
-- 必须锚定官方 V01 结构：
+- 数据口径继承官方 V01：
   `/Users/zhangliang/hlb/04_Jira_jira/issuehub/IssueHub_BI_20260506_V01.html`
+- 页面结构、会议流程、Apple/iOS 风格与交互体验，以 2026-05-09 用户正式认可版本为最高优先级基准：
+  `/Users/zhangliang/hlb/04_Jira_jira/issuehub/IssueHub_BI_20260509_V01.html`
 - 每日输出文件使用：
   - HTML：`/Users/zhangliang/hlb/04_Jira_jira/issuehub/IssueHub_BI_YYYYMMDD_V01.html`
   - JSON：`/Users/zhangliang/hlb/04_Jira_jira/issuehub/IssueHub_BI_YYYYMMDD_V01_data.json`
 - 禁止生成或改名为 NextGen、作战日报、科技行长摘要、高级驾驶舱、Audited 等变体。
 - 除非用户明确要求改版，否则不要重做布局、换风格、换结构；只更新数据、口径和必要局部细节。
 - 风格使用 Apple / iOS 极致清晰风格为默认：白/浅灰背景、Apple系统字体、极简卡片、清晰层级、低噪音、圆角玻璃感、iOS式分段 tab、充足留白、精致阴影；保持银行管理层严肃感。整体目标是“轻松、愉快、清晰、准确”。不要 Hermes 橙黑主题。历史银行深蓝/银灰/金/深红只作为少量强调色，不要再做厚重暗色风。
+- 2026-05-09 正式认可版本：用户明确确认当前 `IssueHub_BI_20260509_V01.html` 这版作为正式版本基准。后续生成 IssueHub BI 时，必须以这版的会议四 tab、Apple/iOS 风格、顶部 12 KPI 全量昨日变化、李科现场像素熊猫、吴员英测试简化下钻、ITPM 管理摘要/Owner闭环分工为默认基准；除非用户明确要求，不要再重做布局或改核心结构。
 - 生成前后必须自检，不能把静态渲染失败的版本交给用户。
 
 ## 标准生成流程
@@ -251,32 +254,45 @@ BI 主 tab 必须按每日会议过程，而不是按数据分析模块排列：
 
 Owner 与闭环 tab 只保留以下结构：
 
-0. `每日开会顺序`
-   - 固定在 Owner 与闭环 tab 最上方。
-   - 五步：看数字 → 看管理 → 李科现场 → 吴员英测试打回 → 按 Owner 逐人看。
-   - 页面排版必须符合开会顺序：先数字、再管理、再现场、再测试、最后逐人闭环。
+正式版 Owner 与闭环 tab 不再承载每日开会顺序、总体趋势、测试打回、版本桶事实或 Issue Classification 图例；这些内容已经按四个会议 tab 拆分。
 
-1. `总体 / 版本桶关闭率趋势`
-   - 静态 SVG
-   - 5 条线：
-     - Jira关闭
-     - 预计总体关闭
-     - 6/26版本
-     - 7/25版本
-     - 8/28版本
-   - 上方必须先展示三个数据卡片：
-     - `Jira总体关闭`：`closed_cancelled / total`、`close_rate%`、说明 Closed/Cancelled/Resolved 口径。
-     - `预计总体关闭`：`expected_closed / total`、`expected_close_rate%`、说明包含待客户验证/客户解释。
-     - `比Jira关闭多出的部分`：`expected_closed - closed_cancelled`，并展开互斥拆分：Ready To Test in UAT、客户解释、评论/描述判定。
-   - 再显示小卡片：
-     - 今日Jira关闭
-     - 今日新增
-     - 预计总体关闭
-   - 点位显示百分比和数字，如 `54.7%` + `434/793`、`69.4%` + `550/793`
+Owner 与闭环 tab 只保留两类核心内容：
 
-2. `测试打回情况 · Custom fields Status`
-   - 固定放在总体/版本桶关闭率趋势之后、版本桶未关闭事实之前。
-   - 用于吴员英讲测试打回情况。
+1. `模块组关闭率排名`
+   - 按主模块组聚合，便于项目负责人先看模块组整体闭环情况。
+   - 重复标签人员不重复计数。
+   - 展示总数、Jira已关闭、Jira未关闭、关闭率、6/26版本 / 7/25版本 / 8/28版本关闭率。
+
+2. `Owner 关闭率追踪`
+   - 只保留“按模块分组清单”。
+   - 使用原生 `<details>` 展开/收起，不依赖 JS。
+   - 每个 Owner 展开后展示：
+     - 当前关闭率
+     - 总数
+     - Jira已关闭
+     - Jira未关闭
+     - S/H open
+     - ETA 超期
+     - 客户解释类 open
+     - 优化 open
+     - Owner 关闭率趋势
+     - Issue Classification 堆积（未关闭）
+     - 未关闭负载
+     - Issue 前后对比
+
+禁止在 Owner 与闭环 tab 中重复出现：
+
+- `每日开会顺序`
+- `总体 / 版本桶关闭率趋势`
+- `测试打回情况 · Custom fields Status`
+- `版本桶未关闭事实`
+- `Issue Classification 图例`
+
+`总体 / 版本桶关闭率趋势` 与 `版本桶未关闭事实` 放在 `3 ITPM讲管理摘要` tab；`测试打回情况 · Custom fields Status` 放在 `2 吴员英讲测试` tab。
+
+## 测试打回情况：固定
+
+`2 吴员英讲测试` tab 用于吴员英讲测试打回情况。
    - 分子：当天 Custom fields 的 `Status` 字段被翻转为 `验证不通过` 的 Issue 数量。
    - 分母：当天 Custom fields 的 `Status` 字段被翻转为以下提测状态的 Issue 数量：
      - `已部署国内-SIT`
@@ -294,43 +310,8 @@ Owner 与闭环 tab 只保留以下结构：
      - 打回人，即谁把 Status 翻转为验证不通过
      - 最近一次提测状态
      - 最近一次提测人，即这个被打回 Issue 之前是谁翻转为已部署国内-SIT / 已部署HLB-SIT / 已部署HLB-UAT
-   - 分母下钻必须展示当天所有提测翻转 Issue，以及提测翻转人。
+   - 分母只展示数字与打回率，不展示“今日提测翻转分母下钻”明细；该明细会议价值低、噪音大。
    - 当前 DB 已确认 Status custom field 为 `custom_field_id=5`，edit_logs 中字段为 `field_label_snapshot='Status'`；后续若字段 ID 变化，应优先按 label/key 查找 Status，不要硬编码到不可修复。
-
-3. `版本桶未关闭事实`
-   - 只展示事实指标：
-     - 版本桶
-     - 未关闭
-     - S/H
-     - S
-     - H
-     - 缺 Tester
-   - 禁止健康分、Critical/Watch/At Risk/Healthy 等等级。
-
-3. `Issue Classification 图例`
-   - 说明堆积图只统计未关闭 Issue。
-
-- `模块组关闭率排名`
-   - 按主模块组聚合。
-   - 重复标签人员不重复计数。
-   - 展示总数、Jira已关闭、Jira未关闭、关闭率、6/26版本 / 7/25版本 / 8/28版本关闭率。
-
-5. `Owner 关闭率追踪`
-   - 只保留“按模块分组清单”。
-   - 使用原生 `<details>` 展开/收起，不依赖 JS。
-   - 每个 Owner 展开后展示：
-     - 当前关闭率
-     - 总数
-     - Jira已关闭
-     - Jira未关闭
-     - S/H open
-     - ETA 超期
-     - 客户解释类 open
-     - 优化 open
-     - Owner 关闭率趋势
-     - Issue Classification 堆积（未关闭）
-     - 未关闭负载
-     - Issue 前后对比
 
 禁止在 Owner tab 中出现：
 
@@ -367,7 +348,7 @@ Owner 与闭环 tab 只保留以下结构：
 
 ## 管理摘要模板：固定
 
-BI 页面顶部 KPI 下方必须增加“管理摘要”卡片，放在原 Issue Classification 管理视图 note 之前。原分类管理视图可以保留为第二条 note，但管理摘要必须更靠前。
+正式版中，“管理摘要”固定放在 `3 ITPM讲管理摘要` tab 内；旧的顶部 `Issue Classification 管理视图` note 与 KPI 重复，必须从可见页面删除，仅在 JS 需要时保留隐藏 `summary` 占位。
 
 管理摘要用于给项目负责人/管理层一眼看懂当前闭环状态，固定分为四块：
 
@@ -435,8 +416,9 @@ BI 页面顶部 KPI 下方必须增加“管理摘要”卡片，放在原 Issue
 1. 数据源与顶部 KPI
    - JSON `source_db` 必须是用户指定 DB。
    - 顶部每个 KPI 卡片必须显露“较昨日”的变化提示，不能只写进 HTML 但页面看不到。
-   - 至少 total/open/close_rate 要有真实昨日差异，其他无可靠历史来源时可显示 `较昨日 —`，不要编造。
-   - 渲染方式要稳：在 DOMContentLoaded、立即执行、短延迟补偿各执行一次，避免主 init() 后生成 KPI 卡片导致 delta 没插进去。
+   - 必须采用静态/模板内渲染：生成 HTML 时先基于每日 DB 切片趋势计算 yesterday→today 差异，然后直接注入到主 init() 的 KPI 卡片模板中，例如把 `ks.map(x=>...)` 改为 `ks.map((x,i)=>...KPI_DELTAS[i]...)`。
+   - 禁止只依赖 DOMContentLoaded/setTimeout 后补丁插入；这种方式容易被 init() 时序覆盖。
+   - 必须把所有顶部 KPI 的 yesterday→today 差异都做出来，不要只做 total/open/close_rate。每日切片趋势应由 `snap_metrics()` 对每个 DB 同口径重算并持久化详细字段：`critical_open`、`s_open`、`h_open`、`wefi_program_all`、`hlb_requirement_all`、`hlb_environment_all`、`missing_tester_critical`、`client_eta_overdue_open`、`classification_empty_open`。只有真实缺字段时才显示 `较昨日 —`，不能偷懒。
    - 自测必须用浏览器 DOM 查询 `.kpi .kdelta`，确认数量等于 KPI 卡片数量，且前 3 项显示真实变化。
 
 2. Jira 关闭口径
@@ -468,7 +450,7 @@ BI 页面顶部 KPI 下方必须增加“管理摘要”卡片，放在原 Issue
 7. 每日会议顺序与 tab 顺序
    - 主 tabs 必须只有四个：`1 李科同步现场`、`2 吴员英讲测试`、`3 ITPM讲管理摘要`、`4 ITPM讲Owner与闭环`。
    - 默认 active section 必须是 `1 李科同步现场`，section id 为 `live`。
-   - `1 李科同步现场` section id 为 `live`，下方可加入轻松但不幼稚的视觉元素以减少空白；当前固定使用像素大熊猫插画（纯 HTML/CSS，不依赖图片），要求更大、更胖、像素感明显，可用轻微 CSS 动效（上下浮动/挥手/竹子轻摆），让页面轻松、愉快、清晰但不影响数据严肃性。
+   - `1 李科同步现场` section id 为 `live`，下方可加入轻松但不幼稚的视觉元素以减少空白；当前固定使用像素大熊猫插画（纯 HTML/CSS，不依赖图片）。熊猫必须明显像大熊猫：圆胖白脸、黑耳、黑眼圈、白嘴鼻、胖身体、黑手脚、竹子；像素块不要过大，要用更细腻的小像素网格（约 5px 级纹理优先），保留轻微 CSS 动效（上下浮动/挥手/竹子轻摆），让页面轻松、愉快、清晰但不影响数据严肃性。不要显示“现场同步完，继续稳稳推进”这类额外文案。
    - `2 吴员英讲测试` section id 为 `test`，必须包含 `测试打回情况 · Custom fields Status`，并显示验证不通过新增、提测翻转分母、打回率、当前验证不通过存量；只保留“新增验证不通过下钻”，删除“今日提测翻转分母下钻”明细，避免会议噪音。
    - `3 ITPM讲管理摘要` section id 为 `mgmt`，必须包含管理摘要、Jira总体关闭、预计总体关闭、比Jira关闭多出的部分、趋势图，并把 `版本桶未关闭事实` 放在此页。
    - `4 ITPM讲Owner与闭环` section id 为 `owner`，必须完整保留原 Owner 与闭环核心逻辑；禁止删改 Owner 分组、Owner趋势、Issue Classification 堆积（未关闭）、模块组关闭率排名。此页不再重复展示总体关闭率趋势、测试打回情况、版本桶未关闭事实、Issue Classification 图例。
@@ -476,10 +458,11 @@ BI 页面顶部 KPI 下方必须增加“管理摘要”卡片，放在原 Issue
    - 旧的顶部 `Issue Classification 管理视图` note 与上方 KPI 重复，必须从可见页面删除；如 JS 依赖 `id="summary"`，保留隐藏占位 `<div id="summary" style="display:none"></div>`，不要显示该段文字。
 
 8. 强化前端自测
-   - 必须用浏览器逐个点击所有 tab：Owner与闭环、数据质量、总览、分类分布、流转与模块、版本/ETA、关键清单。
+   - 必须用浏览器逐个点击四个主会议 tab：`1 李科同步现场`、`2 吴员英讲测试`、`3 ITPM讲管理摘要`、`4 ITPM讲Owner与闭环`。
    - 每次点击后检查 browser console，JS errors 必须为 0。
-   - 必须检查关键容器存在且渲染：`badClassTable`、`etaMissingTable`、`goliveMissingTable`、`classAllChart`、`classOpenChart`、`classDistTables`、`statusChart`、`actionTable`。
-   - 必须检查 tab onclick id 与 section id 一致：`dataq` 对数据质量、`classify` 对分类分布。
+   - 原补充 section `dataq`、`overview`、`classify`、`flow`、`eta`、`lists` 不作为每日主 tab 点击，但必须保留在 DOM 中，避免旧 JS/查询能力断裂。
+   - 必须检查关键容器存在且不因缺 DOM 报错：`badClassTable`、`etaMissingTable`、`goliveMissingTable`、`classAllChart`、`classOpenChart`、`classDistTables`、`statusChart`、`actionTable`。
+   - 必须检查四个主 tab onclick id 与 section id 一致：`live`、`test`、`mgmt`、`owner`。
    - 必须自检原有口径不变：total、closed_cancelled、expected_closed、open、Issue Classification 未关闭堆积、6/26/7/25/8/28 标签。
 
 9. 静态渲染
@@ -515,9 +498,22 @@ assert '6/26版本' in owner and '7/25版本' in owner and '8/28版本' in owner
 
 - `js_errors == []`
 
-## 已验证参考版本
+## 正式认可版本
 
-2026-05-08 21:10 最新 DB 已验证：
+2026-05-09 正式认可版本为当前最高优先级基准：
+
+- HTML：`/Users/zhangliang/hlb/04_Jira_jira/issuehub/IssueHub_BI_20260509_V01.html`
+- 页面主结构：四个会议 tab —— `1 李科同步现场`、`2 吴员英讲测试`、`3 ITPM讲管理摘要`、`4 ITPM讲Owner与闭环`
+- 风格：Apple / iOS 极致清晰风，轻松、愉快、清晰、准确。
+- 顶部 KPI：12 个卡片全部展示 yesterday→today 变化，必须从每日 DB 切片趋势同口径重算。
+- 李科现场：保留细腻像素大熊猫，不显示“现场同步完，继续稳稳推进”等额外文案。
+- 吴员英测试：只保留新增验证不通过下钻；删除今日提测翻转分母下钻。
+- ITPM 管理摘要：承载管理摘要、总体/版本桶趋势、版本桶未关闭事实。
+- ITPM Owner与闭环：只保留模块组关闭率排名与 Owner 关闭率追踪核心逻辑；不重复趋势、测试、版本桶事实、Issue Classification 图例。
+
+## 历史已验证参考版本
+
+2026-05-08 21:10 DB 历史验证：
 
 - DB：`/Users/zhangliang/hlb/04_Jira_jira/issuehub/daily_db/issuehub-2026-05-08T13-25-41-987Z.db`
 - HTML：`/Users/zhangliang/hlb/04_Jira_jira/issuehub/IssueHub_BI_20260508_V01.html`
