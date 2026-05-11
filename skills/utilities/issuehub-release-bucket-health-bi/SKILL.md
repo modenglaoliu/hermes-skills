@@ -280,6 +280,13 @@ Owner 与闭环 tab 只保留两类核心内容：
      - 未关闭负载
      - Issue 前后对比
 
+   - Owner 详情卡中，`未关闭负载` 必须使用定稿 bucket 结构，不要用线性堆叠小卡片：
+     1. `版本桶未关闭`：展示 6/26版本、7/25版本、8/28版本三个小 bucket。
+     2. `优先级桶`：展示 S/H/M/L/其他等有值优先级 bucket。
+     3. `状态桶`：展示 New / In Progress / Ready To Test in UAT / 其他等有值状态 bucket。
+   - `版本桶 · xxx` 这类重复线性项必须删除，避免和结构化版本桶重复。
+   - bucket 视觉定稿：整体 Apple/iOS 小卡片风，尺寸克制；小 bucket 约 40px 高，数字约 16px，标题约 10px。版本桶用克制金色系，优先级桶用银灰色系，状态桶用安心绿色系（Ready To Test in UAT/Ready/Resolved 应给人“接近通过、可放心”的心理暗示），不要使用蓝/绿/黄跳色组合。
+
 禁止在 Owner 与闭环 tab 中重复出现：
 
 - `每日开会顺序`
@@ -454,6 +461,7 @@ Owner 与闭环 tab 只保留两类核心内容：
    - `2 吴员英讲测试` section id 为 `test`，必须包含 `测试打回情况 · Custom fields Status`，并显示验证不通过新增、提测翻转分母、打回率、当前验证不通过存量；只保留“新增验证不通过下钻”，删除“今日提测翻转分母下钻”明细，避免会议噪音。
    - `3 ITPM讲管理摘要` section id 为 `mgmt`，必须包含管理摘要、Jira总体关闭、预计总体关闭、比Jira关闭多出的部分、趋势图，并把 `版本桶未关闭事实` 放在此页。
    - `4 ITPM讲Owner与闭环` section id 为 `owner`，必须完整保留原 Owner 与闭环核心逻辑；禁止删改 Owner 分组、Owner趋势、Issue Classification 堆积（未关闭）、模块组关闭率排名。此页不再重复展示总体关闭率趋势、测试打回情况、版本桶未关闭事实、Issue Classification 图例。
+   - Owner 分组定稿口径：`王玉珏` 归 `CED组`，不要写成 `王玉玦`；`田娟` 归 `sales组`，不再归前端组。
    - 原补充 section id `dataq`、`overview`、`classify`、`flow`、`eta`、`lists` 必须仍保留在 DOM 中，确保原渲染逻辑不报错，但不要放在每日会议主 tab 上。
    - 旧的顶部 `Issue Classification 管理视图` note 与上方 KPI 重复，必须从可见页面删除；如 JS 依赖 `id="summary"`，保留隐藏占位 `<div id="summary" style="display:none"></div>`，不要显示该段文字。
 
@@ -510,6 +518,8 @@ assert '6/26版本' in owner and '7/25版本' in owner and '8/28版本' in owner
 - 吴员英测试：只保留新增验证不通过下钻；删除今日提测翻转分母下钻。
 - ITPM 管理摘要：承载管理摘要、总体/版本桶趋势、版本桶未关闭事实。
 - ITPM Owner与闭环：只保留模块组关闭率排名与 Owner 关闭率追踪核心逻辑；不重复趋势、测试、版本桶事实、Issue Classification 图例。
+- Owner 详情定稿：`未关闭负载` 采用三段结构化 bucket（版本桶未关闭 / 优先级桶 / 状态桶），金色/银色/安心绿色 Apple/iOS 色系，小尺寸克制展示；不再线性堆叠“版本桶 · xxx”。
+- 人员墙定稿：王玉珏属于 CED组（正确名字是“王玉珏”），田娟属于 sales组。
 
 ## 历史已验证参考版本
 
