@@ -286,6 +286,7 @@ Owner 与闭环 tab 只保留两类核心内容：
      3. `状态桶`：展示 New / In Progress / Ready To Test in UAT / 其他等有值状态 bucket。
    - `版本桶 · xxx` 这类重复线性项必须删除，避免和结构化版本桶重复。
    - bucket 视觉定稿：整体 Apple/iOS 小卡片风，尺寸克制；小 bucket 约 40px 高，数字约 16px，标题约 10px。版本桶用克制金色系，优先级桶用银灰色系，状态桶用安心绿色系（Ready To Test in UAT/Ready/Resolved 应给人“接近通过、可放心”的心理暗示），不要使用蓝/绿/黄跳色组合。
+   - 重要事故教训：版本桶小卡片的“关闭率”绝不能用 `open==0 ? —` 或 `total==0 ? 0%` 这种拍脑袋逻辑。用户已纠正：版本桶卡片的大数字是“未关闭数量”；关闭率展示规则为：如果该版本未关闭数量 `open == 0`，显示 `关闭率 100%`（会议口径表示该版本已全部关闭）；否则显示该版本桶内 `closed / total`。例如李斌 6/26 未关闭为 0，必须显示关闭率 100%，不能显示 0% 或 —；李斌 7/25 total=3/open=3/closed=0，显示 0.0%；8/28 total=8/open=8/closed=0，显示 0.0%。
 
 禁止在 Owner 与闭环 tab 中重复出现：
 
@@ -472,6 +473,7 @@ Owner 与闭环 tab 只保留两类核心内容：
    - 必须检查关键容器存在且不因缺 DOM 报错：`badClassTable`、`etaMissingTable`、`goliveMissingTable`、`classAllChart`、`classOpenChart`、`classDistTables`、`statusChart`、`actionTable`。
    - 必须检查四个主 tab onclick id 与 section id 一致：`live`、`test`、`mgmt`、`owner`。
    - 必须自检原有口径不变：total、closed_cancelled、expected_closed、open、Issue Classification 未关闭堆积、6/26/7/25/8/28 标签。
+   - 必须全量校验所有 Owner 的版本桶卡片，而不是抽样：对每个 Owner 的 6/26、7/25、8/28 三张卡，逐一比对 HTML 展示值与 JSON/DB 计算值：大数字必须等于该版本未关闭数量；关闭率必须满足 `open==0 => 100%`，否则 `closed/total`。同时检查 Owner 折叠标题行不得再显示 6/26/7/25/8/28 的版本关闭率，避免误导。若发现一个 Owner 不一致，禁止交付。
 
 9. 静态渲染
    - 顶部趋势图每条 polyline 至少 2 个点，最好有历史 3 点。
@@ -518,7 +520,7 @@ assert '6/26版本' in owner and '7/25版本' in owner and '8/28版本' in owner
 - 吴员英测试：只保留新增验证不通过下钻；删除今日提测翻转分母下钻。
 - ITPM 管理摘要：承载管理摘要、总体/版本桶趋势、版本桶未关闭事实。
 - ITPM Owner与闭环：只保留模块组关闭率排名与 Owner 关闭率追踪核心逻辑；不重复趋势、测试、版本桶事实、Issue Classification 图例。
-- Owner 详情定稿：`未关闭负载` 采用三段结构化 bucket（版本桶未关闭 / 优先级桶 / 状态桶），金色/银色/安心绿色 Apple/iOS 色系，小尺寸克制展示；不再线性堆叠“版本桶 · xxx”。
+- Owner 详情定稿：`未关闭负载` 采用三段结构化 bucket（版本桶未关闭 / 优先级桶 / 状态桶），金色/银色/安心绿色 Apple/iOS 色系，小尺寸克制展示；不再线性堆叠“版本桶 · xxx”。版本桶卡片必须同时展示未关闭数量和关闭率；关闭率规则是 `open==0 => 100%`，否则 `closed/total`，并且必须全员自动化校验。
 - 人员墙定稿：王玉珏属于 CED组（正确名字是“王玉珏”），田娟属于 sales组。
 
 ## 历史已验证参考版本
